@@ -1,0 +1,97 @@
+
+/**
+ * Styles for the Fokus demo page.
+ * 
+ * @author Hakim El Hattab | http://hakim.se
+ */
+
+* {
+	margin: 0;
+	padding: 0;
+}
+
+html, 
+body {
+	height: 100%;
+}
+
+body {
+	background: #eee;
+	font-family: 'Lato', Helvetica, sans-serif;
+	font-size: 16px;
+	color: #222;
+}
+
+a {
+	color: #c2575b;
+	text-decoration: none;
+
+	-webkit-transition: 0.15s color ease;
+	   -moz-transition: 0.15s color ease;
+	    -ms-transition: 0.15s color ease;
+	     -o-transition: 0.15s color ease;
+	        transition: 0.15s color ease;
+}
+	a:hover {
+		color: #f76f76;
+	}
+
+h1, 
+h2 {
+	font-size: 24px;
+}
+
+.intro {
+	background: #eee;
+	padding: 40px 60px;
+	overflow-y: auto;
+
+	-webkit-box-sizing: border-box;
+	   -moz-box-sizing: border-box;
+	        box-sizing: border-box;
+}
+	.intro>article {
+		max-width: 400px;
+	}
+	.intro p {
+		margin: 10px 0 10px 0;
+		font-size: 16px;
+		line-height: 1.5em;
+	}
+	.intro small {
+		display: block;
+		margin-top: 10px;
+		padding-top: 10px;
+		color: #333;
+		font-size: 0.85em;
+		border-top: 1px dashed #ccc;
+
+		-webkit-text-size-adjust: none;
+	}
+	.intro .sharing {
+		margin-top: 20px;
+	}
+
+.demo {
+	border-top: 1px solid #ccc;
+	padding: 40px 60px;
+	background: #fff;
+}
+	.demo>article {
+		display: inline-block;
+		max-width: 320px;
+		vertical-align: top;
+		margin: 0 20px 20px 0;
+		line-height: 1.5em;
+	}
+	.demo>article.double {
+		max-width: 640px;
+	}
+	.demo>article img {
+		max-width: 100%;
+		margin-bottom: 10px;
+	}
+	.demo>article h2 {
+		margin-bottom: 10px;
+	}
+

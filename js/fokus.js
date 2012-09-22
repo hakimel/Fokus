@@ -11,6 +11,9 @@
 	// Padding around the selection
 	var PADDING = 5;
 
+	// Opacity of overlay
+	var OPACITY = 0.75;
+
 	// The opaque overlay canvas
 	var overlay,
 		overlayContext,
@@ -83,7 +86,7 @@
 
 		// Fade in if there's a valid selection...
 		if( hasSelection() ) {
-			overlayAlpha += ( 0.8 - overlayAlpha ) * 0.08;
+			overlayAlpha += ( OPACITY - overlayAlpha ) * 0.08;
 		}
 		// ... otherwise fade out
 		else {

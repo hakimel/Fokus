@@ -10,6 +10,10 @@
 	padding: 0;
 }
 
+::selection { 
+	background: #d1edf8;
+}
+
 html, 
 body {
 	height: 100%;
@@ -42,6 +46,7 @@ h2 {
 }
 
 .intro {
+	display: inline-block;
 	background: #eee;
 	padding: 40px 60px;
 	overflow-y: auto;

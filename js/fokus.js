@@ -19,55 +19,79 @@
 		// Reference to the redraw animation so it can be cancelled 
 		redrawAnimation,
 
-		highlight = { left: 0, top: 0, right: 0, bottom: 0 };
+		// Currently selected region
+		currentRegion = { left: 0, top: 0, right: 0, bottom: 0 },
+
+		// Currently cleared region
+		clearedRegion = { left: 0, top: 0, right: 0, bottom: 0 };
 
 	// choo choo!
 	function initialize() {
-		overlay = document.createElement( 'canvas' );
-		overlayContext = overlay.getContext( '2d' );
 
-		// Place the canvas on top of 
-		overlay.style.position = 'fixed';
-		overlay.style.left = 0;
-		overlay.style.top = 0;
-		overlay.style.zIndex = 2147483647; // beat that with your measly 32 bits
-		overlay.style.pointerEvents = 'none';
+		// Only initialize if the client is capable
+		if( capable() ) {
 
-		bindEvent( document, 'mousedown', onMouseDown );
-		bindEvent( window, 'resize', onWindowResize );
+			overlay = document.createElement( 'canvas' );
+			overlayContext = overlay.getContext( '2d' );
 
-		// Trigger an initial resize
-		onWindowResize();
+			// Place the canvas on top of 
+			overlay.style.position = 'fixed';
+			overlay.style.left = 0;
+			overlay.style.top = 0;
+			overlay.style.zIndex = 2147483647; // beat that with your measly 32 bits
+			overlay.style.pointerEvents = 'none';
+
+			document.addEventListener( 'mousedown', onMouseDown, false );
+			window.addEventListener( 'resize', onWindowResize, false );
+
+			// Trigger an initial resize
+			onWindowResize();
+
+		}
+
 	}
 
 	/**
-	 * Redraws the overlay and clears the current highlights.
+	 * Is this browser capable of running Fokus?
+	 */
+	function capable() {
+
+		return !!( 
+			'addEventListener' in document &&
+			'pointerEvents' in document.body.style 
+		);
+
+	}
+
+	/**
+	 * Redraws an animates the overlay.
 	 */
 	function redraw() {
+
 		// Reset to a solid (less opacity) overlay fill
 		overlayContext.clearRect( 0, 0, overlay.width, overlay.height );
 		overlayContext.fillStyle = 'rgba( 0, 0, 0, '+ overlayAlpha +' )';
 		overlayContext.fillRect( 0, 0, overlay.width, overlay.height );
 
-		// Fade in if there's a highlight...
-		if( hasHighlight() ) {
-			overlayContext.clearRect( 
-				highlight.left - window.scrollX - PADDING, 
-				highlight.top - window.scrollY - PADDING, 
-				( highlight.right - highlight.left ) + ( PADDING * 2 ), 
-				( highlight.bottom - highlight.top ) + ( PADDING * 2 ) 
-			);
+		// Cut out the cleared region
+		overlayContext.clearRect( 
+			clearedRegion.left - window.scrollX - PADDING, 
+			clearedRegion.top - window.scrollY - PADDING, 
+			( clearedRegion.right - clearedRegion.left ) + ( PADDING * 2 ), 
+			( clearedRegion.bottom - clearedRegion.top ) + ( PADDING * 2 ) 
+		);
 
-			overlayAlpha += ( 0.8 - overlayAlpha ) * 0.05;
+		// Fade in if there's a valid selection...
+		if( hasSelection() ) {
+			overlayAlpha += ( 0.8 - overlayAlpha ) * 0.08;
 		}
 		// ... otherwise fade out
 		else {
-			overlayAlpha = Math.max( ( overlayAlpha * 0.85 ) - 0.01, 0 );
+			overlayAlpha = Math.max( ( overlayAlpha * 0.85 ) - 0.02, 0 );
 		}
 
-		// Continue so long as there are highlights remaining or we are 
-		// fading out
-		if( hasHighlight() || overlayAlpha > 0 ) {
+		// Continue so long as there is content selected or we are fading out
+		if( hasSelection() || overlayAlpha > 0 ) {
 			// Append the overlay if it isn't already in the DOM
 			if( !overlay.parentNode ) document.body.appendChild( overlay );
 
@@ -78,15 +102,17 @@
 		else {
 			document.body.removeChild( overlay );
 		}
+
 	}
 
 	/**
-	 * Steps through all selected nodes and creates a 
-	 * highlight region.
+	 * Steps through all selected nodes and updates current region
+	 * (bounds of selection).
 	 */
 	function updateSelection() {
-		// Default to no highlight
-		highlight = { left: Number.MAX_VALUE, top: Number.MAX_VALUE, right: 0, bottom: 0 };
+
+		// Default to negative space
+		currentRegion = { left: Number.MAX_VALUE, top: Number.MAX_VALUE, right: 0, bottom: 0 };
 
 		var nodes = getSelectedNodes();
 
@@ -103,71 +129,58 @@
 				h = node.offsetHeight;
 
 			if( node && typeof x === 'number' && typeof w === 'number' ) {
-				highlight.left = Math.min( highlight.left, x );
-				highlight.top = Math.min( highlight.top, y );
-				highlight.right = Math.max( highlight.right, x + w );
-				highlight.bottom = Math.max( highlight.bottom, y + h );
+				currentRegion.left = Math.min( currentRegion.left, x );
+				currentRegion.top = Math.min( currentRegion.top, y );
+				currentRegion.right = Math.max( currentRegion.right, x + w );
+				currentRegion.bottom = Math.max( currentRegion.bottom, y + h );
 			}
 		}
 
-		if( hasHighlight() ) {
+		if( hasSelection() ) {
+			clearedRegion = currentRegion;
 			redraw();
 		}
+
 	}
 
 	/**
-	 * Checks if a region is currently highlighted/selected.
+	 * Checks if a region is currently selected.
 	 */
-	function hasHighlight() {
-		return highlight.left < highlight.right && highlight.top < highlight.bottom;
+	function hasSelection() {
+
+		return currentRegion.left < currentRegion.right && currentRegion.top < currentRegion.bottom;
+
 	}
 
 	function onMouseDown( event ) {
-		bindEvent( document, 'mousemove', onMouseMove );
-		bindEvent( document, 'mouseup', onMouseUp );
+
+		document.addEventListener( 'mousemove', onMouseMove, false );
+		document.addEventListener( 'mouseup', onMouseUp, false );
 
 		updateSelection();
+
 	}
 
 	function onMouseMove( event ) {
+
 		updateSelection();
+
 	}
 
 	function onMouseUp( event ) {
-		// console.log(getSelectionHtml());
-		unbindEvent( document, 'mousemove', onMouseMove );
-		unbindEvent( document, 'mouseup', onMouseUp );
+
+		document.removeEventListener( 'mousemove', onMouseMove, false );
+		document.removeEventListener( 'mouseup', onMouseUp, false );
 
 		setTimeout( updateSelection, 1 );
+
 	}
 
 	function onWindowResize( event ) {
+
 		overlay.width = window.innerWidth;
 		overlay.height = window.innerHeight;
-	}
 
-	/**
-	 * Adds an event listener in a browser safe way.
-	 */
-	function bindEvent( element, ev, fn ) {
-		if( element.addEventListener ) {
-			element.addEventListener( ev, fn, false );
-		}
-		else {
-			element.attachEvent( 'on' + ev, fn );
-		}
-	}
-
-	/**
-	 * Removes an event listener in a browser safe way.
-	 */
-	function unbindEvent( element, ev, fn ) {
-		if( element.removeEventListener ) {
-			element.removeEventListener( ev, fn, false );
-		}
-		else {
-			element.detachEvent( 'on' + ev, fn );
-		}
 	}
 
 	/**
@@ -175,6 +188,7 @@
 	 * http://stackoverflow.com/questions/7781963/js-get-array-of-all-selected-nodes-in-contenteditable-div
 	 */
 	function getSelectedNodes() {
+		
 		if (window.getSelection) {
 			var sel = window.getSelection();
 			if (!sel.isCollapsed) {
@@ -182,8 +196,10 @@
 			}
 		}
 		return [];
+
 	}
 	function getRangeSelectedNodes( range ) {
+
 		var node = range.startContainer;
 		var endNode = range.endContainer;
 
@@ -209,8 +225,10 @@
 		}	    
 
 		return rangeNodes;
+
 	}
 	function nextNode(node) {
+
 		if (node.hasChildNodes()) {
 			return node.firstChild;
 		} else {
@@ -222,6 +240,7 @@
 			}
 			return node.nextSibling;
 		}
+
 	}
 
 	/**

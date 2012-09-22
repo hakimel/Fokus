@@ -41,7 +41,7 @@
 			overlay.style.position = 'fixed';
 			overlay.style.left = 0;
 			overlay.style.top = 0;
-			overlay.style.zIndex = 2147483647; // beat that with your measly 32 bits
+			overlay.style.zIndex = Number.MAX_VALUE; // just goofing //2147483647; // beat that with your measly 32 bits
 			overlay.style.pointerEvents = 'none';
 
 			document.addEventListener( 'mousedown', onMouseDown, false );

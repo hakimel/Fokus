@@ -115,13 +115,14 @@
 		currentRegion = { left: Number.MAX_VALUE, top: Number.MAX_VALUE, right: 0, bottom: 0 };
 
 		var nodes = getSelectedNodes();
-
+		
 		for( var i = 0, len = nodes.length; i < len; i++ ) {
 			var node = nodes[i];
 
-			// if( len === 1 && node.nodeName === '#text' ) {
-			// 	node = node.parentNode;
-			// }
+			// Select parents of text nodes that have contents
+			if( node.nodeName === '#text' && node.nodeValue.trim() ) {
+				node = node.parentNode;
+			}
 
 			var x = node.offsetLeft, 
 				y = node.offsetTop, 

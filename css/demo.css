@@ -56,7 +56,7 @@ h2 {
 	        box-sizing: border-box;
 }
 	.intro>article {
-		max-width: 400px;
+		width: 400px;
 	}
 	.intro p {
 		margin: 10px 0 10px 0;
@@ -98,5 +98,8 @@ h2 {
 	}
 	.demo>article h2 {
 		margin-bottom: 10px;
+	}
+	.demo>article .image-link {
+		display: block;
 	}
 

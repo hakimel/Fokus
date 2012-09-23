@@ -55,6 +55,21 @@ h2 {
 	   -moz-box-sizing: border-box;
 	        box-sizing: border-box;
 }
+	.intro h1 {
+		position: relative;
+	}
+	.intro h1:after {
+		content: '';
+		position: absolute;
+		display: inline-block;
+		width: 48px;
+		height: 48px;
+		top: -9px;
+		margin-left: 7px;
+		
+		background-image: url( 'fokus48.png' );
+		background-repeat: no-repeat;
+	}
 	.intro>article {
 		width: 400px;
 	}

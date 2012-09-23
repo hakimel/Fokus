@@ -1,6 +1,10 @@
 # Fokus
 
+Fokus uses JavaScript to emphasize anything you select by covering the rest of the page with semi-transparent black.
+
 [Check out the demo page](http://lab.hakim.se/fokus/).
+
+[Get the Fokus Chrome extension](https://chrome.google.com/webstore/detail/flkkpmjbbpijiedjdgnhkcgopgnflehe).
 
 ## History
 

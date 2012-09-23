@@ -11,7 +11,7 @@
 	// Padding around the selection
 	var PADDING = 5;
 
-	// Opacity of overlay
+	// Opacity of the overlay
 	var OPACITY = 0.75;
 
 	// The opaque overlay canvas
@@ -32,7 +32,10 @@
 	function initialize() {
 
 		// Only initialize if the client is capable
-		if( capable() ) {
+		if( capable() && !window.__fokused ) {
+
+			// Ensures that Fokus isn't initialized twice on the same page
+			window.__fokused = true;
 
 			overlay = document.createElement( 'canvas' );
 			overlayContext = overlay.getContext( '2d' );

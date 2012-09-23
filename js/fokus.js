@@ -1,5 +1,5 @@
 /*!
- * Fokus 0.1
+ * Fokus 0.2
  * http://lab.hakim.se/fokus
  * MIT licensed
  *
@@ -23,7 +23,7 @@
 		redrawAnimation,
 
 		// Currently selected region
-		currentRegion = { left: 0, top: 0, right: 0, bottom: 0 },
+		selectedRegion = { left: 0, top: 0, right: 0, bottom: 0 },
 
 		// Currently cleared region
 		clearedRegion = { left: 0, top: 0, right: 0, bottom: 0 };
@@ -44,10 +44,11 @@
 			overlay.style.position = 'fixed';
 			overlay.style.left = 0;
 			overlay.style.top = 0;
-			overlay.style.zIndex = 2147483647; // beat that with your measly 32 bits
+			overlay.style.zIndex = 2147483647;
 			overlay.style.pointerEvents = 'none';
 
 			document.addEventListener( 'mousedown', onMouseDown, false );
+			document.addEventListener( 'keyup', onKeyUp, false );
 			window.addEventListener( 'resize', onWindowResize, false );
 
 			// Trigger an initial resize
@@ -74,10 +75,27 @@
 	 */
 	function redraw() {
 
+		// Cache the response of this for re-use below
+		var _hasSelection = hasSelection();
+
 		// Reset to a solid (less opacity) overlay fill
 		overlayContext.clearRect( 0, 0, overlay.width, overlay.height );
 		overlayContext.fillStyle = 'rgba( 0, 0, 0, '+ overlayAlpha +' )';
 		overlayContext.fillRect( 0, 0, overlay.width, overlay.height );
+
+		if( _hasSelection ) {
+			if( overlayAlpha < 0.1 ) {
+				// Clear the selection instantly
+				clearedRegion = selectedRegion;
+			}
+			else {
+				// Ease the cleared region towards the current selection
+				clearedRegion.left += ( selectedRegion.left - clearedRegion.left ) * 0.15;
+				clearedRegion.top += ( selectedRegion.top - clearedRegion.top ) * 0.15;
+				clearedRegion.right += ( selectedRegion.right - clearedRegion.right ) * 0.15;
+				clearedRegion.bottom += ( selectedRegion.bottom - clearedRegion.bottom ) * 0.15;
+			}
+		}
 
 		// Cut out the cleared region
 		overlayContext.clearRect( 
@@ -88,7 +106,7 @@
 		);
 
 		// Fade in if there's a valid selection...
-		if( hasSelection() ) {
+		if( _hasSelection ) {
 			overlayAlpha += ( OPACITY - overlayAlpha ) * 0.08;
 		}
 		// ... otherwise fade out
@@ -97,7 +115,7 @@
 		}
 
 		// Continue so long as there is content selected or we are fading out
-		if( hasSelection() || overlayAlpha > 0 ) {
+		if( _hasSelection || overlayAlpha > 0 ) {
 			// Append the overlay if it isn't already in the DOM
 			if( !overlay.parentNode ) document.body.appendChild( overlay );
 
@@ -118,7 +136,7 @@
 	function updateSelection() {
 
 		// Default to negative space
-		currentRegion = { left: Number.MAX_VALUE, top: Number.MAX_VALUE, right: 0, bottom: 0 };
+		selectedRegion = { left: Number.MAX_VALUE, top: Number.MAX_VALUE, right: 0, bottom: 0 };
 
 		var nodes = getSelectedNodes();
 		
@@ -139,15 +157,14 @@
 				h = node.offsetHeight;
 
 			if( node && typeof x === 'number' && typeof w === 'number' ) {
-				currentRegion.left = Math.min( currentRegion.left, x );
-				currentRegion.top = Math.min( currentRegion.top, y );
-				currentRegion.right = Math.max( currentRegion.right, x + w );
-				currentRegion.bottom = Math.max( currentRegion.bottom, y + h );
+				selectedRegion.left = Math.min( selectedRegion.left, x );
+				selectedRegion.top = Math.min( selectedRegion.top, y );
+				selectedRegion.right = Math.max( selectedRegion.right, x + w );
+				selectedRegion.bottom = Math.max( selectedRegion.bottom, y + h );
 			}
 		}
 
 		if( hasSelection() ) {
-			clearedRegion = currentRegion;
 			redraw();
 		}
 
@@ -158,7 +175,7 @@
 	 */
 	function hasSelection() {
 
-		return currentRegion.left < currentRegion.right && currentRegion.top < currentRegion.bottom;
+		return selectedRegion.left < selectedRegion.right && selectedRegion.top < selectedRegion.bottom;
 
 	}
 
@@ -183,6 +200,12 @@
 		document.removeEventListener( 'mouseup', onMouseUp, false );
 
 		setTimeout( updateSelection, 1 );
+
+	}
+
+	function onKeyUp( event ) {
+
+		updateSelection();
 
 	}
 

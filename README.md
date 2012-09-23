@@ -12,6 +12,10 @@ If you want to use this on your site simple include the [fokus.min.js](https://g
 
 ## History
 
+#### 0.2
+- Animate change in cleared area
+- Handle selection via keyboard
+
 #### 0.1
 - Initial release
 

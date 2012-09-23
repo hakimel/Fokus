@@ -127,8 +127,11 @@
 				node = node.parentNode;
 			}
 
-			var x = node.offsetLeft, 
-				y = node.offsetTop, 
+			// Fetch the screen coordinates for this element
+			var position = getScreenPosition( node );
+
+			var x = position.x, 
+				y = position.y, 
 				w = node.offsetWidth, 
 				h = node.offsetHeight;
 
@@ -245,6 +248,24 @@
 			return node.nextSibling;
 		}
 
+	}
+
+	/**
+	 * Gets the x/y screen position of the target node, source:
+	 * http://www.quirksmode.org/js/findpos.html
+	 */
+	function getScreenPosition( node ) {
+		var x = 0,
+			y = 0;
+
+		if ( node.offsetParent ) {
+			do {
+				x += node.offsetLeft;
+				y += node.offsetTop;
+			} while ( node = node.offsetParent );
+		}
+
+		return { x: x, y: y };
 	}
 
 	/**

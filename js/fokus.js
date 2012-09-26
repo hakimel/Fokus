@@ -1,5 +1,5 @@
 /*!
- * Fokus 0.2
+ * Fokus 0.3
  * http://lab.hakim.se/fokus
  * MIT licensed
  *
@@ -156,7 +156,7 @@
 				w = node.offsetWidth, 
 				h = node.offsetHeight;
 
-			if( node && typeof x === 'number' && typeof w === 'number' && !node.nodeName.match( /^br$/gi ) ) {
+			if( node && typeof x === 'number' && typeof w === 'number' && !node.nodeName.match( /^br$/gi ) && ( w > 0 || h > 0 ) ) {
 				selectedRegion.left = Math.min( selectedRegion.left, x );
 				selectedRegion.top = Math.min( selectedRegion.top, y );
 				selectedRegion.right = Math.max( selectedRegion.right, x + w );

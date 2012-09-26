@@ -156,7 +156,7 @@
 				w = node.offsetWidth, 
 				h = node.offsetHeight;
 
-			if( node && typeof x === 'number' && typeof w === 'number' ) {
+			if( node && typeof x === 'number' && typeof w === 'number' && !node.nodeName.match( /^br$/gi ) ) {
 				selectedRegion.left = Math.min( selectedRegion.left, x );
 				selectedRegion.top = Math.min( selectedRegion.top, y );
 				selectedRegion.right = Math.max( selectedRegion.right, x + w );

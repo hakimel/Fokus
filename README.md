@@ -12,6 +12,9 @@ If you want to use this on your site simple include the [fokus.min.js](https://g
 
 ## History
 
+#### 0.4
+- Don't start selection on rightclick
+
 #### 0.3
 - Don't select elements of zero width and height
 - Don't select br nodes

@@ -1,5 +1,5 @@
 /*!
- * Fokus 0.3
+ * Fokus 0.4
  * http://lab.hakim.se/fokus
  * MIT licensed
  *
@@ -181,10 +181,13 @@
 
 	function onMouseDown( event ) {
 
-		document.addEventListener( 'mousemove', onMouseMove, false );
-		document.addEventListener( 'mouseup', onMouseUp, false );
+		// Don't start selection on right click
+		if( event.which !== 3 ) {
+			document.addEventListener( 'mousemove', onMouseMove, false );
+			document.addEventListener( 'mouseup', onMouseUp, false );
 
-		updateSelection();
+			updateSelection();
+		}
 
 	}
 

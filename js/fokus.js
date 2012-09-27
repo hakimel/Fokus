@@ -3,7 +3,7 @@
  * http://lab.hakim.se/fokus
  * MIT licensed
  *
- * Copyright (C) 2011-2012 Hakim El Hattab, http://hakim.se
+ * Copyright (C) 2012 Hakim El Hattab, http://hakim.se
  */
 
 (function(){
@@ -40,7 +40,7 @@
 			overlay = document.createElement( 'canvas' );
 			overlayContext = overlay.getContext( '2d' );
 
-			// Place the canvas on top of 
+			// Place the canvas on top of everything
 			overlay.style.position = 'fixed';
 			overlay.style.left = 0;
 			overlay.style.top = 0;
@@ -85,11 +85,11 @@
 
 		if( _hasSelection ) {
 			if( overlayAlpha < 0.1 ) {
-				// Clear the selection instantly
+				// Clear the selection instantly if we're just fading in
 				clearedRegion = selectedRegion;
 			}
 			else {
-				// Ease the cleared region towards the current selection
+				// Ease the cleared region towards the selected selection
 				clearedRegion.left += ( selectedRegion.left - clearedRegion.left ) * 0.15;
 				clearedRegion.top += ( selectedRegion.top - clearedRegion.top ) * 0.15;
 				clearedRegion.right += ( selectedRegion.right - clearedRegion.right ) * 0.15;
@@ -114,13 +114,15 @@
 			overlayAlpha = Math.max( ( overlayAlpha * 0.85 ) - 0.02, 0 );
 		}
 
+		// Ensure there is no overlap
+		cancelAnimationFrame( redrawAnimation );
+
 		// Continue so long as there is content selected or we are fading out
 		if( _hasSelection || overlayAlpha > 0 ) {
 			// Append the overlay if it isn't already in the DOM
 			if( !overlay.parentNode ) document.body.appendChild( overlay );
 
 			// Stage a new animation frame
-			cancelAnimationFrame( redrawAnimation );
 			redrawAnimation = requestAnimationFrame( redraw );
 		}
 		else {
@@ -130,8 +132,8 @@
 	}
 
 	/**
-	 * Steps through all selected nodes and updates current region
-	 * (bounds of selection).
+	 * Steps through all selected nodes and updates the selected 
+	 * region (bounds of selection).
 	 */
 	function updateSelection() {
 
@@ -156,7 +158,11 @@
 				w = node.offsetWidth, 
 				h = node.offsetHeight;
 
-			if( node && typeof x === 'number' && typeof w === 'number' && !node.nodeName.match( /^br$/gi ) && ( w > 0 || h > 0 ) ) {
+			// 1. offsetLeft works
+			// 2. offsetWidth works
+			// 3. Element is larger than zero pixels
+			// 4. Element is not <br>
+			if( node && typeof x === 'number' && typeof w === 'number' && ( w > 0 || h > 0 ) && !node.nodeName.match( /^br$/gi ) ) {
 				selectedRegion.left = Math.min( selectedRegion.left, x );
 				selectedRegion.top = Math.min( selectedRegion.top, y );
 				selectedRegion.right = Math.max( selectedRegion.right, x + w );
@@ -164,6 +170,7 @@
 			}
 		}
 
+		// Start repainting if there is a selected region
 		if( hasSelection() ) {
 			redraw();
 		}
@@ -212,6 +219,10 @@
 
 	}
 
+	/**
+	 * Make sure the overlay canvas is always as wide and tall as 
+	 * the current window.
+	 */
 	function onWindowResize( event ) {
 
 		overlay.width = window.innerWidth;

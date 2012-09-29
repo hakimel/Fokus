@@ -1,5 +1,5 @@
 /*!
- * Fokus 0.4
+ * Fokus 0.5
  * http://lab.hakim.se/fokus
  * MIT licensed
  *
@@ -49,6 +49,8 @@
 
 			document.addEventListener( 'mousedown', onMouseDown, false );
 			document.addEventListener( 'keyup', onKeyUp, false );
+			document.addEventListener( 'scroll', onScroll, false );
+			document.addEventListener( 'DOMMouseScroll', onScroll, false );
 			window.addEventListener( 'resize', onWindowResize, false );
 
 			// Trigger an initial resize
@@ -90,10 +92,10 @@
 			}
 			else {
 				// Ease the cleared region towards the selected selection
-				clearedRegion.left += ( selectedRegion.left - clearedRegion.left ) * 0.15;
-				clearedRegion.top += ( selectedRegion.top - clearedRegion.top ) * 0.15;
-				clearedRegion.right += ( selectedRegion.right - clearedRegion.right ) * 0.15;
-				clearedRegion.bottom += ( selectedRegion.bottom - clearedRegion.bottom ) * 0.15;
+				clearedRegion.left += ( selectedRegion.left - clearedRegion.left ) * 0.18;
+				clearedRegion.top += ( selectedRegion.top - clearedRegion.top ) * 0.18;
+				clearedRegion.right += ( selectedRegion.right - clearedRegion.right ) * 0.18;
+				clearedRegion.bottom += ( selectedRegion.bottom - clearedRegion.bottom ) * 0.18;
 			}
 		}
 
@@ -134,8 +136,12 @@
 	/**
 	 * Steps through all selected nodes and updates the selected 
 	 * region (bounds of selection).
+	 *
+	 * @param {Boolean} immediate flags if selection should happen 
+	 * immediately, defaults to false which means the selection 
+	 * rect animates into place
 	 */
-	function updateSelection() {
+	function updateSelection( immediate ) {
 
 		// Default to negative space
 		selectedRegion = { left: Number.MAX_VALUE, top: Number.MAX_VALUE, right: 0, bottom: 0 };
@@ -168,6 +174,10 @@
 				selectedRegion.right = Math.max( selectedRegion.right, x + w );
 				selectedRegion.bottom = Math.max( selectedRegion.bottom, y + h );
 			}
+		}
+
+		if( immediate ) {
+			clearedRegion = selectedRegion;
 		}
 
 		// Start repainting if there is a selected region
@@ -216,6 +226,12 @@
 	function onKeyUp( event ) {
 
 		updateSelection();
+
+	}
+
+	function onScroll( event ) {
+
+		updateSelection( true );
 
 	}
 
@@ -295,8 +311,8 @@
 	 * http://www.quirksmode.org/js/findpos.html
 	 */
 	function getScreenPosition( node ) {
-		var x = 0,
-			y = 0;
+		var x = document.documentElement.offsetLeft,
+			y = document.documentElement.offsetTop;
 
 		if ( node.offsetParent ) {
 			do {

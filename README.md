@@ -12,6 +12,11 @@ If you want to use this on your site simple include the [fokus.min.js](https://g
 
 ## History
 
+#### 0.5
+- Faster selection animation
+- Handle offset document element (```<html>```)
+- Update selection immediately on scroll
+
 #### 0.4
 - Don't start selection on rightclick
 

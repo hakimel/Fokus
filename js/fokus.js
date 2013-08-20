@@ -14,19 +14,25 @@
 	// Opacity of the overlay
 	var OPACITY = 0.75;
 
+	// Key modifier that needs to be held down for overlay to appear
+	var MODIFIER = null;
+
 	// The opaque overlay canvas
 	var overlay,
 		overlayContext,
 		overlayAlpha = 0,
 
-		// Reference to the redraw animation so it can be cancelled 
+		// Reference to the redraw animation so it can be cancelled
 		redrawAnimation,
 
 		// Currently selected region
 		selectedRegion = { left: 0, top: 0, right: 0, bottom: 0 },
 
 		// Currently cleared region
-		clearedRegion = { left: 0, top: 0, right: 0, bottom: 0 };
+		clearedRegion = { left: 0, top: 0, right: 0, bottom: 0 },
+
+		// Currently pressed down key modifiers
+		keyModifiers = { ctrl: false, shift: false, alt: false, cmd: false };
 
 	// choo choo!
 	function initialize() {
@@ -48,7 +54,8 @@
 			overlay.style.pointerEvents = 'none';
 
 			document.addEventListener( 'mousedown', onMouseDown, false );
-			document.addEventListener( 'keyup', onKeyUp, false );
+			document.addEventListener( 'keyup', onKeyPress, false );
+			document.addEventListener( 'keydown', onKeyPress, false );
 			document.addEventListener( 'scroll', onScroll, false );
 			document.addEventListener( 'DOMMouseScroll', onScroll, false );
 			window.addEventListener( 'resize', onWindowResize, false );
@@ -65,9 +72,9 @@
 	 */
 	function capable() {
 
-		return !!( 
+		return !!(
 			'addEventListener' in document &&
-			'pointerEvents' in document.body.style 
+			'pointerEvents' in document.body.style
 		);
 
 	}
@@ -100,11 +107,11 @@
 		}
 
 		// Cut out the cleared region
-		overlayContext.clearRect( 
-			clearedRegion.left - window.scrollX - PADDING, 
-			clearedRegion.top - window.scrollY - PADDING, 
-			( clearedRegion.right - clearedRegion.left ) + ( PADDING * 2 ), 
-			( clearedRegion.bottom - clearedRegion.top ) + ( PADDING * 2 ) 
+		overlayContext.clearRect(
+			clearedRegion.left - window.scrollX - PADDING,
+			clearedRegion.top - window.scrollY - PADDING,
+			( clearedRegion.right - clearedRegion.left ) + ( PADDING * 2 ),
+			( clearedRegion.bottom - clearedRegion.top ) + ( PADDING * 2 )
 		);
 
 		// Fade in if there's a valid selection...
@@ -134,20 +141,20 @@
 	}
 
 	/**
-	 * Steps through all selected nodes and updates the selected 
+	 * Steps through all selected nodes and updates the selected
 	 * region (bounds of selection).
 	 *
-	 * @param {Boolean} immediate flags if selection should happen 
-	 * immediately, defaults to false which means the selection 
+	 * @param {Boolean} immediate flags if selection should happen
+	 * immediately, defaults to false which means the selection
 	 * rect animates into place
 	 */
 	function updateSelection( immediate ) {
 
 		// Default to negative space
-		selectedRegion = { left: Number.MAX_VALUE, top: Number.MAX_VALUE, right: 0, bottom: 0 };
+		var currentRegion = { left: Number.MAX_VALUE, top: Number.MAX_VALUE, right: 0, bottom: 0 };
 
 		var nodes = getSelectedNodes();
-		
+
 		for( var i = 0, len = nodes.length; i < len; i++ ) {
 			var node = nodes[i];
 
@@ -159,9 +166,9 @@
 			// Fetch the screen coordinates for this element
 			var position = getScreenPosition( node );
 
-			var x = position.x, 
-				y = position.y, 
-				w = node.offsetWidth, 
+			var x = position.x,
+				y = position.y,
+				w = node.offsetWidth,
 				h = node.offsetHeight;
 
 			// 1. offsetLeft works
@@ -169,13 +176,20 @@
 			// 3. Element is larger than zero pixels
 			// 4. Element is not <br>
 			if( node && typeof x === 'number' && typeof w === 'number' && ( w > 0 || h > 0 ) && !node.nodeName.match( /^br$/gi ) ) {
-				selectedRegion.left = Math.min( selectedRegion.left, x );
-				selectedRegion.top = Math.min( selectedRegion.top, y );
-				selectedRegion.right = Math.max( selectedRegion.right, x + w );
-				selectedRegion.bottom = Math.max( selectedRegion.bottom, y + h );
+				currentRegion.left = Math.min( currentRegion.left, x );
+				currentRegion.top = Math.min( currentRegion.top, y );
+				currentRegion.right = Math.max( currentRegion.right, x + w );
+				currentRegion.bottom = Math.max( currentRegion.bottom, y + h );
 			}
 		}
 
+		// Don't update selection if a modifier is specified but not
+		// pressed down, unless there's already a selected region
+		if( !MODIFIER || MODIFIER === 'none' || keyModifiers[ MODIFIER ] || hasSelection() ) {
+			selectedRegion = currentRegion;
+		}
+
+		// If flagged, update the cleared region immediately
 		if( immediate ) {
 			clearedRegion = selectedRegion;
 		}
@@ -223,7 +237,11 @@
 
 	}
 
-	function onKeyUp( event ) {
+	function onKeyPress( event ) {
+		keyModifiers.alt = event.altKey || event.altGraphKey;
+		keyModifiers.ctrl = event.ctrlKey;
+		keyModifiers.shift = event.shiftKey;
+		keyModifiers.meta = event.metaKey;
 
 		updateSelection();
 
@@ -236,7 +254,7 @@
 	}
 
 	/**
-	 * Make sure the overlay canvas is always as wide and tall as 
+	 * Make sure the overlay canvas is always as wide and tall as
 	 * the current window.
 	 */
 	function onWindowResize( event ) {
@@ -251,7 +269,7 @@
 	 * http://stackoverflow.com/questions/7781963/js-get-array-of-all-selected-nodes-in-contenteditable-div
 	 */
 	function getSelectedNodes() {
-		
+
 		if (window.getSelection) {
 			var sel = window.getSelection();
 			if (!sel.isCollapsed) {
@@ -285,7 +303,7 @@
 		while (node && node != range.commonAncestorContainer) {
 			rangeNodes.unshift(node);
 			node = node.parentNode;
-		}	    
+		}
 
 		return rangeNodes;
 
@@ -332,20 +350,20 @@
 		var vendors = ['ms', 'moz', 'webkit', 'o'];
 		for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
 			window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-			window.cancelAnimationFrame = 
+			window.cancelAnimationFrame =
 			  window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
 		}
-	 
+
 		if (!window.requestAnimationFrame)
 			window.requestAnimationFrame = function(callback, element) {
 				var currTime = new Date().getTime();
 				var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-				var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+				var id = window.setTimeout(function() { callback(currTime + timeToCall); },
 				  timeToCall);
 				lastTime = currTime + timeToCall;
 				return id;
 			};
-	 
+
 		if (!window.cancelAnimationFrame)
 			window.cancelAnimationFrame = function(id) {
 				clearTimeout(id);

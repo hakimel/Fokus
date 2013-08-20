@@ -35,4 +35,4 @@ If you want to use this on your site simple include the [fokus.min.js](https://g
 
 MIT licensed
 
-Copyright (C) 2012 Hakim El Hattab, http://hakim.se
+Copyright (C) 2012-2013 Hakim El Hattab, http://hakim.se

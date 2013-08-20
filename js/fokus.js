@@ -46,6 +46,7 @@
 			overlay.style.top = 0;
 			overlay.style.zIndex = 2147483647;
 			overlay.style.pointerEvents = 'none';
+			overlay.style.background = 'transparent';
 
 			document.addEventListener( 'mousedown', onMouseDown, false );
 			document.addEventListener( 'keyup', onKeyUp, false );

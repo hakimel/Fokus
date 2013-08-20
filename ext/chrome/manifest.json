@@ -1,0 +1,21 @@
+{
+  "name": "Fokus",
+  "version": "1.7",
+  "manifest_version": 2,
+  "description": "Emphasized text-highlighting",
+  "icons": {
+    "16": "fokus16.png",
+    "48": "fokus48.png",
+    "128": "fokus128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [ "http://*/*", "https://*/*" ],
+      "js": [ "fokus.min.js" ]
+    }
+  ],
+  "options_page": "options.html",
+  "permissions": [
+    "storage"
+  ]
+}

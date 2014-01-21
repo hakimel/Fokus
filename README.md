@@ -8,8 +8,8 @@ If you want to use this on your site simply include the [fokus.min.js](https://g
 
 [Check out the demo page](http://lab.hakim.se/fokus/).
 
-[Get the Fokus Chrome extension](https://chrome.google.com/webstore/detail/flkkpmjbbpijiedjdgnhkcgopgnflehe).
-[Get the Fokus Firefox extention (not official)](https://addons.mozilla.org/en-US/firefox/addon/fokus/). 
+[Get the Fokus Chrome extension](https://chrome.google.com/webstore/detail/flkkpmjbbpijiedjdgnhkcgopgnflehe).  
+[Get the Fokus Firefox extension](https://addons.mozilla.org/en-US/firefox/addon/fokus/) by @aaronraimist.  
 
 ## History
 
